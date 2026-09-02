@@ -684,10 +684,16 @@ function HomePage({ isMobile }) {
   const savingsSeries = useMemo(() => {
     const sorted = [...savings].sort((a, b) => new Date(a.date) - new Date(b.date));
     let running = 0;
-    return sorted.map((s) => {
+    const points = sorted.map((s) => {
       running += s.amount;
       return { date: formatDate(s.date).slice(0, 6), total: Math.round(running * 100) / 100 };
     });
+    // Prepend a zero point so even a single saving draws a rising line
+    // instead of a single dot with nothing to compare it against.
+    if (points.length > 0) {
+      return [{ date: "Start", total: 0 }, ...points];
+    }
+    return points;
   }, [savings]);
 
   const spendingByCategory = useMemo(() => {
@@ -732,7 +738,7 @@ function HomePage({ isMobile }) {
       <div style={{ display: "grid", gap: 16, gridTemplateColumns: isMobile ? "1fr" : "1.3fr 1fr" }}>
         <Card>
           <CardHeading title="Savings progress" sub="Running total over time" />
-          {savingsSeries.length > 1 ? (
+          {savingsSeries.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={savingsSeries} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
                 <defs>
