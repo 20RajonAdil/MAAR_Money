@@ -2,10 +2,70 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="MAAR Money — a calm, simple way to track your income, savings, spending and savings bundles." />
-    <title>MAAR Money</title>
+
+    <!-- Primary SEO -->
+    <title>MAAR Money — Track Income, Savings, Spending & Bundles</title>
+    <meta name="description" content="MAAR Money is a calm, simple way to understand your income, savings and spending, and to save towards specific goals with Bundles. No banking sync, no clutter — just clarity." />
+    <meta name="keywords" content="MAAR Money, personal finance app, savings tracker, budgeting app, savings bundles, money management UK, expense tracker" />
+    <meta name="author" content="MAAR" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://maarmoney.vercel.app/" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#1F3A32" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="MAAR Money" />
+    <meta property="og:title" content="MAAR Money — Track Income, Savings, Spending & Bundles" />
+    <meta property="og:description" content="A calm, simple way to understand your income, savings and spending, and to save towards specific goals with Bundles." />
+    <meta property="og:url" content="https://maarmoney.vercel.app/" />
+    <meta property="og:image" content="https://maarmoney.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_GB" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MAAR Money — Track Income, Savings, Spending & Bundles" />
+    <meta name="twitter:description" content="A calm, simple way to understand your income, savings and spending, and to save towards specific goals with Bundles." />
+    <meta name="twitter:image" content="https://maarmoney.vercel.app/og-image.png" />
+
+    <!-- Structured data for search engines -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "MAAR Money",
+      "url": "https://maarmoney.vercel.app/",
+      "description": "A calm, simple way to understand your income, savings and spending, and to save towards specific goals with Bundles.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Any (web browser)",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "GBP"
+      }
+    }
+    </script>
+
+    <!--
+      Google Analytics (GA4)
+      Replace G-XXXXXXXXXX below with your real Measurement ID from
+      analytics.google.com → Admin → Data Streams → your web stream.
+      Until it's replaced, no real data is sent anywhere.
+    -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      gtag("js", new Date());
+      gtag("config", "G-XXXXXXXXXX");
+    </script>
   </head>
   <body>
     <div id="root"></div>

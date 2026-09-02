@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import BlurText from "./components/BlurText.jsx";
+import CountUp from "./components/CountUp.jsx";
 import {
   Home, PiggyBank, Receipt, Layers, Trophy, User, Plus, X, Check, ChevronRight,
   ChevronLeft, TrendingUp, Wallet, Target, Menu, Pencil, Calendar, ArrowRight,
@@ -463,7 +466,7 @@ function OnboardingFlow({ onComplete }) {
 
         {step === 0 && (
           <Card className="maar-fade-up">
-            <h1 className="maar-serif" style={{ fontSize: 23, margin: "0 0 8px", fontWeight: 600 }}>How much do you earn?</h1>
+            <BlurText text="How much do you earn?" as="h1" className="maar-serif" style={{ fontSize: 23, margin: "0 0 8px", fontWeight: 600 }} />
             <p style={{ fontSize: 14, color: "var(--ink-soft)", lineHeight: 1.5, margin: "0 0 22px" }}>
               This helps MAAR show your savings and spending against your income, so your progress makes sense at a glance.
               It's completely optional — nothing here is shared or required.
@@ -484,7 +487,7 @@ function OnboardingFlow({ onComplete }) {
 
         {step === 1 && (
           <Card className="maar-fade-up">
-            <h1 className="maar-serif" style={{ fontSize: 23, margin: "0 0 8px", fontWeight: 600 }}>How much would you like to save?</h1>
+            <BlurText text="How much would you like to save?" as="h1" className="maar-serif" style={{ fontSize: 23, margin: "0 0 8px", fontWeight: 600 }} />
             <p style={{ fontSize: 14, color: "var(--ink-soft)", lineHeight: 1.5, margin: "0 0 22px" }}>
               Set a target to work towards. MAAR will track your progress and let you know when you get there — you can always adjust it later.
             </p>
@@ -508,7 +511,7 @@ function OnboardingFlow({ onComplete }) {
 
         {step === 2 && (
           <Card className="maar-fade-up">
-            <h1 className="maar-serif" style={{ fontSize: 23, margin: "0 0 8px", fontWeight: 600 }}>How often?</h1>
+            <BlurText text="How often?" as="h1" className="maar-serif" style={{ fontSize: 23, margin: "0 0 8px", fontWeight: 600 }} />
             <p style={{ fontSize: 14, color: "var(--ink-soft)", lineHeight: 1.5, margin: "0 0 22px" }}>
               Choose how frequently your {formatGBP(parseFloat(target || 0))} target resets.
             </p>
@@ -631,7 +634,7 @@ function TopBar({ title, action, onMenu, isMobile }) {
 
 /* ============================== SUMMARY CARD ============================== */
 
-function SummaryCard({ label, value, icon: Icon, tint = "var(--moss-tint)", iconColor = "var(--forest-soft)", sub }) {
+function SummaryCard({ label, value, amount, icon: Icon, tint = "var(--moss-tint)", iconColor = "var(--forest-soft)", sub }) {
   return (
     <Card padded={false} style={{ padding: "18px 20px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
@@ -640,7 +643,9 @@ function SummaryCard({ label, value, icon: Icon, tint = "var(--moss-tint)", icon
         </div>
         <span style={{ fontSize: 12.5, color: "var(--ink-soft)", fontWeight: 600 }}>{label}</span>
       </div>
-      <p className="maar-serif" style={{ fontSize: 25, fontWeight: 600, margin: 0 }}>{value}</p>
+      <p className="maar-serif" style={{ fontSize: 25, fontWeight: 600, margin: 0 }}>
+        {typeof amount === "number" && !Number.isNaN(amount) ? <CountUp value={amount} format={(v) => formatGBP(v)} /> : value}
+      </p>
       {sub && <p style={{ fontSize: 12, color: "var(--ink-soft)", margin: "4px 0 0" }}>{sub}</p>}
     </Card>
   );
@@ -698,16 +703,17 @@ function HomePage({ isMobile }) {
 
   return (
     <div style={{ padding: isMobile ? "8px 18px 24px" : "8px 30px 30px" }}>
-      <p style={{ fontSize: 14.5, color: "var(--ink-soft)", margin: "0 0 22px" }}>
-        Here's where things stand today.
-      </p>
+      <BlurText
+        text="Here's where things stand today."
+        style={{ fontSize: 14.5, color: "var(--ink-soft)", margin: "0 0 22px", fontWeight: 400 }}
+      />
 
       <div style={{
         display: "grid", gap: 14, marginBottom: 24,
         gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(4, 1fr)",
       }}>
         {profile.income !== null && (
-          <SummaryCard label="Monthly income" value={formatGBP(profile.income)} icon={Wallet} />
+          <SummaryCard label="Monthly income" amount={profile.income} icon={Wallet} />
         )}
         {profile.savingsTarget !== null && (
           <SummaryCard
@@ -716,10 +722,10 @@ function HomePage({ isMobile }) {
             sub={`${formatGBP(currentPeriodTotal)} so far`}
           />
         )}
-        <SummaryCard label="Total saved" value={formatGBP(totalSaved)} icon={PiggyBank} />
-        <SummaryCard label="Total spent" value={formatGBP(totalSpent)} icon={Receipt} tint="var(--brick-tint)" iconColor="var(--brick)" />
+        <SummaryCard label="Total saved" amount={totalSaved} icon={PiggyBank} />
+        <SummaryCard label="Total spent" amount={totalSpent} icon={Receipt} tint="var(--brick-tint)" iconColor="var(--brick)" />
         {remaining !== null && (
-          <SummaryCard label="Remaining" value={formatGBP(remaining)} icon={TrendingUp} />
+          <SummaryCard label="Remaining" amount={remaining} icon={TrendingUp} />
         )}
       </div>
 
@@ -850,11 +856,11 @@ function SavingsPage({ isMobile }) {
       </div>
 
       <div style={{ display: "grid", gap: 14, gridTemplateColumns: isMobile ? "1fr 1fr" : "repeat(3, 1fr)", margin: "18px 0 24px" }}>
-        <SummaryCard label="Total saved" value={formatGBP(total)} icon={PiggyBank} />
+        <SummaryCard label="Total saved" amount={total} icon={PiggyBank} />
         {profile.savingsTarget !== null ? (
           <>
-            <SummaryCard label={`This ${FREQUENCY_LABEL[profile.frequency]}`} value={formatGBP(currentPeriodTotal)} icon={TrendingUp} />
-            <SummaryCard label="Target" value={formatGBP(profile.savingsTarget)} icon={Target} tint="var(--brass-tint)" iconColor="var(--brass)" />
+            <SummaryCard label={`This ${FREQUENCY_LABEL[profile.frequency]}`} amount={currentPeriodTotal} icon={TrendingUp} />
+            <SummaryCard label="Target" amount={profile.savingsTarget} icon={Target} tint="var(--brass-tint)" iconColor="var(--brass)" />
           </>
         ) : (
           <Card style={{ gridColumn: "span 2" }}>
@@ -966,7 +972,7 @@ function ExpensesPage({ isMobile }) {
       </div>
 
       <div style={{ margin: "18px 0 24px" }}>
-        <SummaryCard label="Total spent" value={formatGBP(total)} icon={Receipt} tint="var(--brick-tint)" iconColor="var(--brick)" />
+        <SummaryCard label="Total spent" amount={total} icon={Receipt} tint="var(--brick-tint)" iconColor="var(--brick)" />
       </div>
 
       {byCategory.length > 0 && (
@@ -1096,8 +1102,11 @@ function BundlesPage({ isMobile }) {
           </Card>
         ) : (
           <div style={{ display: "grid", gap: 14, gridTemplateColumns: isMobile ? "1fr" : "repeat(auto-fill, minmax(260px, 1fr))" }}>
-            {active.map((b) => (
-              <BundleCard key={b.id} bundle={b} onAddMoney={() => setAddTo(b)} onEdit={() => setEditing(b)} />
+            {active.map((b, i) => (
+              <motion.div key={b.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.28, delay: Math.min(i, 6) * 0.05, ease: [0.2, 0.8, 0.2, 1] }}>
+                <BundleCard bundle={b} onAddMoney={() => setAddTo(b)} onEdit={() => setEditing(b)} />
+              </motion.div>
             ))}
           </div>
         )}
@@ -1337,23 +1346,12 @@ function ProfileRow({ label, value }) {
 /* ============================== FOOTER ============================== */
 
 function Footer({ isMobile }) {
-  const links = ["Privacy Policy", "Terms and Conditions", "Cookie Policy", "Accessibility Statement", "Contact"];
   return (
     <footer style={{ borderTop: "1px solid var(--border)", padding: isMobile ? "20px 18px" : "22px 30px", marginTop: 8 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <MaarMark size={18} />
         <span style={{ fontSize: 13, fontWeight: 700 }}>MAAR Money</span>
         <span style={{ fontSize: 12, color: "var(--ink-soft)" }}>· United Kingdom</span>
-      </div>
-      <p style={{ fontSize: 11.5, color: "var(--ink-soft)", margin: "0 0 10px", lineHeight: 1.6 }}>
-        MAAR Money aims to meet WCAG 2.1 AA standards. Questions? Reach us at namerajonadil@gmail.com.
-      </p>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px 16px" }}>
-        {links.map((l) => (
-          <a key={l} href="#" onClick={(e) => e.preventDefault()} style={{ fontSize: 11.5, color: "var(--ink-soft)", textDecoration: "none", borderBottom: "1px solid transparent" }}>
-            {l}
-          </a>
-        ))}
       </div>
     </footer>
   );
@@ -1380,12 +1378,22 @@ function AppShell() {
       <div className="maar-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, maxHeight: "100vh", overflowY: "auto" }}>
         <div style={{ flex: 1 }}>
           <TopBar title={pageMeta.label} isMobile={isMobile} />
-          {page === "home" && <HomePage isMobile={isMobile} />}
-          {page === "savings" && <SavingsPage isMobile={isMobile} />}
-          {page === "expenses" && <ExpensesPage isMobile={isMobile} />}
-          {page === "bundles" && <BundlesPage isMobile={isMobile} />}
-          {page === "achievements" && <AchievementsPage isMobile={isMobile} />}
-          {page === "profile" && <ProfilePage isMobile={isMobile} />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={page}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: [0.2, 0.8, 0.2, 1] }}
+            >
+              {page === "home" && <HomePage isMobile={isMobile} />}
+              {page === "savings" && <SavingsPage isMobile={isMobile} />}
+              {page === "expenses" && <ExpensesPage isMobile={isMobile} />}
+              {page === "bundles" && <BundlesPage isMobile={isMobile} />}
+              {page === "achievements" && <AchievementsPage isMobile={isMobile} />}
+              {page === "profile" && <ProfilePage isMobile={isMobile} />}
+            </motion.div>
+          </AnimatePresence>
         </div>
         <Footer isMobile={isMobile} />
         {isMobile && <MobileNav page={page} setPage={setPage} />}

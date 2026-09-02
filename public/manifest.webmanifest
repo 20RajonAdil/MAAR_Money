@@ -1,0 +1,12 @@
+{
+  "name": "MAAR Money",
+  "short_name": "MAAR Money",
+  "description": "Track your income, savings, spending and savings Bundles.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F4EE",
+  "theme_color": "#1F3A32",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
