@@ -794,7 +794,7 @@ function HomePage({ isMobile }) {
                   contentStyle={tooltipStyle}
                 />
                 <Area
-                  type="stepAfter" dataKey="total" stroke="#4C7A6A" strokeWidth={2.4} fill="url(#savingsFill)"
+                  type="monotone" dataKey="total" stroke="#4C7A6A" strokeWidth={2.4} fill="url(#savingsFill)"
                   isAnimationActive animationDuration={900} animationEasing="ease-out"
                   dot={(props) => {
                     const { cx, cy, payload, index } = props;
@@ -1408,6 +1408,14 @@ function CalculatorPage({ isMobile }) {
     { label: "M-", fn: () => setState((s) => ({ ...s, memory: s.memory - parseFloat(s.display) })) },
   ];
 
+  const ARIA_LABELS = {
+    "AC": "All clear", "⌫": "Backspace", "%": "Percent", "÷": "Divide",
+    "×": "Multiply", "−": "Subtract", "+": "Add", "±": "Toggle sign",
+    "=": "Equals", ".": "Decimal point", "√": "Square root", "x²": "Square",
+    "xʸ": "Power", "1/x": "Reciprocal", "π": "Pi", "e": "Euler's number",
+    "MC": "Memory clear", "MR": "Memory recall", "M+": "Memory add", "M-": "Memory subtract",
+  };
+
   const CalcBtn = ({ label, onClick, variant = "num", wide }) => {
     const variants = {
       num: { background: "var(--card)", color: "var(--ink)", border: "1px solid var(--border)" },
@@ -1417,7 +1425,7 @@ function CalculatorPage({ isMobile }) {
       sci: { background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", fontSize: 13 },
     };
     return (
-      <button className="maar-focus" onClick={onClick} style={{
+      <button className="maar-focus" onClick={onClick} aria-label={ARIA_LABELS[label] || label} style={{
         ...variants[variant], borderRadius: 12, fontWeight: 600, fontSize: variant === "sci" ? 13 : 16,
         padding: "13px 0", gridColumn: wide ? "span 2" : undefined, transition: "transform 0.1s ease",
       }}
@@ -1464,8 +1472,8 @@ function CalculatorPage({ isMobile }) {
             </button>
           </div>
 
-          <div tabIndex={0} onKeyDown={onKeyDown} style={{ outline: "none" }}>
-            <div style={{
+          <div tabIndex={0} onKeyDown={onKeyDown} role="group" aria-label="Calculator" style={{ outline: "none" }}>
+            <div role="status" aria-live="polite" style={{
               background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 14,
               padding: "18px 16px", textAlign: "right", marginBottom: 12, overflow: "hidden",
             }}>
