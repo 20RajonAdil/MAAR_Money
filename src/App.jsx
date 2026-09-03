@@ -6,11 +6,11 @@ import {
   Home, PiggyBank, Receipt, Layers, Trophy, User, Plus, X, Check, ChevronRight,
   ChevronLeft, TrendingUp, Wallet, Target, Menu, Pencil, Calendar, ArrowRight,
   Sparkles, ShoppingBag, Bus, Zap, Film, GraduationCap, UtensilsCrossed, MoreHorizontal,
-  Loader2, Info, Trash2
+  Loader2, Info, Trash2, Calculator as CalculatorIcon
 } from "lucide-react";
 import {
   ResponsiveContainer, AreaChart, Area, LineChart, Line, BarChart, Bar,
-  PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip
+  PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, LabelList
 } from "recharts";
 
 /* ============================== TOKENS / STYLE ============================== */
@@ -79,6 +79,17 @@ ${FONT_IMPORT}
   to { opacity: 1; transform: translateY(0); }
 }
 .maar-fade-up { animation: maar-fade-up 0.28s ease both; }
+
+.maar-onboard-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+.maar-onboard-actions > * { flex: 1; min-width: 0; white-space: nowrap; }
+@media (max-width: 480px) {
+  .maar-onboard-actions { flex-direction: column; }
+  .maar-onboard-actions > * { white-space: normal; }
+}
 `;
 
 /* ============================== UTILITIES ============================== */
@@ -101,6 +112,9 @@ const formatDate = (iso) => {
 };
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
+
+const shortDate = (ts) => new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+const longDate = (ts) => new Date(ts).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 function startOfPeriod(date, frequency) {
   const d = new Date(date);
@@ -474,11 +488,11 @@ function OnboardingFlow({ onComplete }) {
             <Field label="Monthly income" hint="You can change this any time in Profile.">
               <AmountInput value={income} onChange={(v) => { setIncome(v); setSkipIncome(false); }} autoFocus />
             </Field>
-            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-              <Button variant="ghost" style={{ flex: 1 }} onClick={() => { setSkipIncome(true); setIncome(""); setStep(1); }}>
+            <div className="maar-onboard-actions">
+              <Button variant="ghost" onClick={() => { setSkipIncome(true); setIncome(""); setStep(1); }}>
                 Prefer not to say
               </Button>
-              <Button style={{ flex: 1 }} icon={ArrowRight} onClick={() => setStep(1)}>
+              <Button icon={ArrowRight} onClick={() => setStep(1)}>
                 Continue
               </Button>
             </div>
@@ -494,12 +508,12 @@ function OnboardingFlow({ onComplete }) {
             <Field label="Savings target">
               <AmountInput value={target} onChange={(v) => { setTarget(v); setSkipTarget(false); }} autoFocus />
             </Field>
-            <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-              <Button variant="ghost" style={{ flex: 1 }} icon={ChevronLeft} onClick={() => setStep(0)}>Back</Button>
-              <Button variant="ghost" style={{ flex: 1 }} onClick={() => { setSkipTarget(true); setTarget(""); finish(null, null); }}>
+            <div className="maar-onboard-actions">
+              <Button variant="ghost" icon={ChevronLeft} onClick={() => setStep(0)}>Back</Button>
+              <Button variant="ghost" onClick={() => { setSkipTarget(true); setTarget(""); finish(null, null); }}>
                 Prefer not to say
               </Button>
-              <Button style={{ flex: 1 }} icon={ArrowRight} onClick={() => {
+              <Button icon={ArrowRight} onClick={() => {
                 if (target && parseFloat(target) > 0) setStep(2);
                 else finish(null, null);
               }}>
@@ -529,9 +543,9 @@ function OnboardingFlow({ onComplete }) {
                 </button>
               ))}
             </div>
-            <div style={{ display: "flex", gap: 10 }}>
-              <Button variant="ghost" style={{ flex: 1 }} icon={ChevronLeft} onClick={() => setStep(1)}>Back</Button>
-              <Button style={{ flex: 1 }} icon={ArrowRight} onClick={() => finish(parseFloat(target), frequency)}>
+            <div className="maar-onboard-actions">
+              <Button variant="ghost" icon={ChevronLeft} onClick={() => setStep(1)}>Back</Button>
+              <Button icon={ArrowRight} onClick={() => finish(parseFloat(target), frequency)}>
                 Finish setup
               </Button>
             </div>
@@ -562,6 +576,7 @@ const NAV_ITEMS = [
   { id: "savings", label: "Savings", icon: PiggyBank },
   { id: "expenses", label: "Expenses", icon: Receipt },
   { id: "bundles", label: "Bundles", icon: Layers },
+  { id: "calculator", label: "Calculator", icon: CalculatorIcon },
   { id: "achievements", label: "Achievements", icon: Trophy },
   { id: "profile", label: "Profile", icon: User },
 ];
@@ -597,21 +612,22 @@ function Sidebar({ page, setPage }) {
 
 function MobileNav({ page, setPage }) {
   return (
-    <nav aria-label="Primary" style={{
+    <nav aria-label="Primary" className="maar-scroll" style={{
       position: "sticky", bottom: 0, left: 0, right: 0, background: "var(--card)",
       borderTop: "1px solid var(--border)", display: "flex", justifyContent: "space-around",
-      padding: "8px 4px calc(8px + env(safe-area-inset-bottom))", zIndex: 40,
+      padding: "7px 2px calc(7px + env(safe-area-inset-bottom))", zIndex: 40,
+      overflowX: "auto", gap: 2,
     }}>
       {NAV_ITEMS.map((item) => {
         const active = page === item.id;
         return (
           <button key={item.id} className="maar-focus" onClick={() => setPage(item.id)} aria-current={active ? "page" : undefined}
             style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 3, flexShrink: 0,
               background: "none", border: "none", color: active ? "var(--forest)" : "var(--ink-soft)",
-              fontSize: 10.5, fontWeight: 600, padding: "4px 8px", borderRadius: 10,
+              fontSize: 9.5, fontWeight: 600, padding: "4px 6px", borderRadius: 10, whiteSpace: "nowrap",
             }}>
-            <item.icon size={19} strokeWidth={active ? 2.4 : 2} />
+            <item.icon size={18} strokeWidth={active ? 2.4 : 2} />
             {item.label}
           </button>
         );
@@ -682,16 +698,33 @@ function HomePage({ isMobile }) {
   }, [currentPeriodTotal, profile.savingsTarget, profile.frequency]); // eslint-disable-line
 
   const savingsSeries = useMemo(() => {
-    const sorted = [...savings].sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (savings.length === 0) return [];
+    const dayTotals = {};
+    savings.forEach((s) => { dayTotals[s.date] = (dayTotals[s.date] || 0) + s.amount; });
+    const sortedDates = Object.keys(dayTotals).sort();
+    const start = new Date(sortedDates[0]);
+    const end = new Date(todayISO());
+    const totalDays = Math.max(1, Math.round((end - start) / 86400000) + 1);
+    // Keep the chart readable: step weekly once the range gets long,
+    // but every real saving still lands on its own day's total.
+    const stepDays = totalDays > 120 ? 7 : 1;
+
+    const points = [];
+    const dayBefore = new Date(start);
+    dayBefore.setDate(dayBefore.getDate() - 1);
+    points.push({ date: dayBefore.toISOString().slice(0, 10), timestamp: dayBefore.getTime(), total: 0, hasEntry: false });
+
     let running = 0;
-    const points = sorted.map((s) => {
-      running += s.amount;
-      return { date: formatDate(s.date).slice(0, 6), total: Math.round(running * 100) / 100 };
-    });
-    // Prepend a zero point so even a single saving draws a rising line
-    // instead of a single dot with nothing to compare it against.
-    if (points.length > 0) {
-      return [{ date: "Start", total: 0 }, ...points];
+    let cursor = new Date(start);
+    while (cursor <= end) {
+      const key = cursor.toISOString().slice(0, 10);
+      if (dayTotals[key]) running += dayTotals[key];
+      points.push({ date: key, timestamp: cursor.getTime(), total: Math.round(running * 100) / 100, hasEntry: !!dayTotals[key] });
+      cursor = new Date(cursor.getTime() + stepDays * 86400000);
+    }
+    const endKey = end.toISOString().slice(0, 10);
+    if (points[points.length - 1].date !== endKey) {
+      points.push({ date: endKey, timestamp: end.getTime(), total: Math.round(running * 100) / 100, hasEntry: !!dayTotals[endKey] });
     }
     return points;
   }, [savings]);
@@ -737,10 +770,10 @@ function HomePage({ isMobile }) {
 
       <div style={{ display: "grid", gap: 16, gridTemplateColumns: isMobile ? "1fr" : "1.3fr 1fr" }}>
         <Card>
-          <CardHeading title="Savings progress" sub="Running total over time" />
+          <CardHeading title="Savings progress" sub="Every day plotted — flat where nothing was added, and a dot wherever you saved" />
           {savingsSeries.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={savingsSeries} margin={{ top: 6, right: 6, left: -18, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={220}>
+              <AreaChart data={savingsSeries} margin={{ top: 6, right: 10, left: -18, bottom: 0 }}>
                 <defs>
                   <linearGradient id="savingsFill" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#4C7A6A" stopOpacity={0.35} />
@@ -748,11 +781,28 @@ function HomePage({ isMobile }) {
                   </linearGradient>
                 </defs>
                 <CartesianGrid vertical={false} stroke="#EFE9DA" />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: "#8A8478" }} axisLine={false} tickLine={false} />
+                <XAxis
+                  dataKey="timestamp" type="number" domain={["dataMin", "dataMax"]} scale="time"
+                  tick={{ fontSize: 11, fill: "#8A8478" }} axisLine={false} tickLine={false}
+                  tickFormatter={shortDate} minTickGap={36}
+                />
                 <YAxis tick={{ fontSize: 11, fill: "#8A8478" }} axisLine={false} tickLine={false} width={44}
                   tickFormatter={(v) => `£${v}`} />
-                <Tooltip formatter={(v) => formatGBP(v)} contentStyle={tooltipStyle} />
-                <Area type="monotone" dataKey="total" stroke="#4C7A6A" strokeWidth={2.4} fill="url(#savingsFill)" />
+                <Tooltip
+                  formatter={(v, name, props) => [formatGBP(v), props.payload.hasEntry ? "Saved that day" : "Running total"]}
+                  labelFormatter={(ts) => longDate(ts)}
+                  contentStyle={tooltipStyle}
+                />
+                <Area
+                  type="stepAfter" dataKey="total" stroke="#4C7A6A" strokeWidth={2.4} fill="url(#savingsFill)"
+                  isAnimationActive animationDuration={900} animationEasing="ease-out"
+                  dot={(props) => {
+                    const { cx, cy, payload, index } = props;
+                    if (!payload.hasEntry) return <circle key={`dot-${index}`} cx={cx} cy={cy} r={0} fill="none" />;
+                    return <circle key={`dot-${index}`} cx={cx} cy={cy} r={3.5} fill="#4C7A6A" stroke="#fff" strokeWidth={1.5} />;
+                  }}
+                  activeDot={{ r: 5, fill: "#4C7A6A", stroke: "#fff", strokeWidth: 2 }}
+                />
               </AreaChart>
             </ResponsiveContainer>
           ) : (
@@ -766,7 +816,8 @@ function HomePage({ isMobile }) {
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <ResponsiveContainer width={120} height={120}>
                 <PieChart>
-                  <Pie data={spendingByCategory} dataKey="value" nameKey="label" innerRadius={34} outerRadius={54} paddingAngle={2}>
+                  <Pie data={spendingByCategory} dataKey="value" nameKey="label" innerRadius={34} outerRadius={54} paddingAngle={2}
+                    isAnimationActive animationDuration={800} animationEasing="ease-out">
                     {spendingByCategory.map((c) => <Cell key={c.id} fill={c.color} />)}
                   </Pie>
                   <Tooltip formatter={(v) => formatGBP(v)} contentStyle={tooltipStyle} />
@@ -791,14 +842,17 @@ function HomePage({ isMobile }) {
 
         {profile.income !== null && (
           <Card style={isMobile ? {} : { gridColumn: "1 / -1" }}>
-            <CardHeading title="Income" />
-            <ResponsiveContainer width="100%" height={140}>
-              <BarChart data={incomeData} layout="vertical" margin={{ left: -10 }}>
-                <CartesianGrid horizontal={false} stroke="#EFE9DA" />
+            <CardHeading title="Income" sub="Exact amounts shown alongside each bar" />
+            <ResponsiveContainer width="100%" height={150}>
+              <BarChart data={incomeData} layout="vertical" margin={{ left: -10, right: 76, top: 8, bottom: 8 }}>
+                <CartesianGrid horizontal={false} stroke="#D8D0BC" strokeDasharray="4 4" />
                 <XAxis type="number" tick={{ fontSize: 11, fill: "#8A8478" }} axisLine={false} tickLine={false} tickFormatter={(v) => `£${v}`} />
                 <YAxis type="category" dataKey="label" tick={{ fontSize: 12.5, fill: "#1C2621", fontWeight: 600 }} axisLine={false} tickLine={false} width={64} />
                 <Tooltip formatter={(v) => formatGBP(v)} contentStyle={tooltipStyle} />
-                <Bar dataKey="value" fill="#1F3A32" radius={[0, 8, 8, 0]} barSize={26} />
+                <Bar dataKey="value" radius={[0, 8, 8, 0]} barSize={26} isAnimationActive animationDuration={900} animationEasing="ease-out">
+                  {incomeData.map((d, i) => <Cell key={d.label} fill={i === 0 ? "#4C7A6A" : "#1F3A32"} />)}
+                  <LabelList dataKey="value" position="right" formatter={(v) => formatGBP(v)} style={{ fill: "#1C2621", fontSize: 12.5, fontWeight: 700 }} />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -1258,6 +1312,371 @@ function AchievementsPage({ isMobile }) {
   );
 }
 
+/* ============================== CALCULATOR ============================== */
+
+function round(n, places = 10) {
+  const f = Math.pow(10, places);
+  return Math.round((n + Number.EPSILON) * f) / f;
+}
+
+function calcOp(a, b, op) {
+  switch (op) {
+    case "+": return a + b;
+    case "-": return a - b;
+    case "×": return a * b;
+    case "÷": return b === 0 ? NaN : a / b;
+    case "xʸ": return Math.pow(a, b);
+    default: return b;
+  }
+}
+
+const initialCalcState = { display: "0", prev: null, operator: null, overwrite: true, memory: 0, angleMode: "deg" };
+
+function CalculatorPage({ isMobile }) {
+  const { data } = useApp();
+  const [scientific, setScientific] = useState(false);
+  const [state, setState] = useState(initialCalcState);
+  const { display, prev, operator, memory, angleMode } = state;
+
+  const inputDigit = (d) => setState((s) => {
+    if (s.overwrite) return { ...s, display: d, overwrite: false };
+    if (s.display.length >= 15) return s;
+    return { ...s, display: s.display === "0" ? d : s.display + d };
+  });
+
+  const inputDecimal = () => setState((s) => {
+    if (s.overwrite) return { ...s, display: "0.", overwrite: false };
+    if (s.display.includes(".")) return s;
+    return { ...s, display: s.display + "." };
+  });
+
+  const clearAll = () => setState(initialCalcState);
+
+  const backspace = () => setState((s) => {
+    if (s.overwrite) return s;
+    const next = s.display.slice(0, -1);
+    return { ...s, display: next === "" || next === "-" ? "0" : next };
+  });
+
+  const toggleSign = () => setState((s) => ({ ...s, display: s.display.startsWith("-") ? s.display.slice(1) : (s.display === "0" ? s.display : "-" + s.display) }));
+
+  const inputPercent = () => setState((s) => ({ ...s, display: String(round(parseFloat(s.display) / 100)), overwrite: true }));
+
+  const chooseOperator = (op) => setState((s) => {
+    const current = parseFloat(s.display);
+    if (s.operator && !s.overwrite) {
+      const result = round(calcOp(s.prev, current, s.operator));
+      return { ...s, display: String(result), prev: result, operator: op, overwrite: true };
+    }
+    return { ...s, prev: current, operator: op, overwrite: true };
+  });
+
+  const compute = () => setState((s) => {
+    if (s.operator === null || s.prev === null) return s;
+    const current = parseFloat(s.display);
+    const result = round(calcOp(s.prev, current, s.operator));
+    return { ...s, display: String(result), prev: null, operator: null, overwrite: true };
+  });
+
+  const applyUnary = (fn) => setState((s) => {
+    const v = parseFloat(s.display);
+    const result = round(fn(v));
+    return { ...s, display: Number.isFinite(result) ? String(result) : "Error", overwrite: true };
+  });
+
+  const angleAdjust = (v) => (angleMode === "deg" ? (v * Math.PI) / 180 : v);
+
+  const sciButtons = [
+    { label: "sin", fn: () => applyUnary((v) => Math.sin(angleAdjust(v))) },
+    { label: "cos", fn: () => applyUnary((v) => Math.cos(angleAdjust(v))) },
+    { label: "tan", fn: () => applyUnary((v) => Math.tan(angleAdjust(v))) },
+    { label: angleMode === "deg" ? "DEG" : "RAD", fn: () => setState((s) => ({ ...s, angleMode: s.angleMode === "deg" ? "rad" : "deg" })) },
+    { label: "log", fn: () => applyUnary((v) => Math.log10(v)) },
+    { label: "ln", fn: () => applyUnary((v) => Math.log(v)) },
+    { label: "√", fn: () => applyUnary((v) => Math.sqrt(v)) },
+    { label: "x²", fn: () => applyUnary((v) => v * v) },
+    { label: "xʸ", fn: () => chooseOperator("xʸ") },
+    { label: "1/x", fn: () => applyUnary((v) => 1 / v) },
+    { label: "π", fn: () => setState((s) => ({ ...s, display: String(Math.PI), overwrite: true })) },
+    { label: "e", fn: () => setState((s) => ({ ...s, display: String(Math.E), overwrite: true })) },
+  ];
+
+  const memButtons = [
+    { label: "MC", fn: () => setState((s) => ({ ...s, memory: 0 })) },
+    { label: "MR", fn: () => setState((s) => ({ ...s, display: String(s.memory), overwrite: true })) },
+    { label: "M+", fn: () => setState((s) => ({ ...s, memory: s.memory + parseFloat(s.display) })) },
+    { label: "M-", fn: () => setState((s) => ({ ...s, memory: s.memory - parseFloat(s.display) })) },
+  ];
+
+  const CalcBtn = ({ label, onClick, variant = "num", wide }) => {
+    const variants = {
+      num: { background: "var(--card)", color: "var(--ink)", border: "1px solid var(--border)" },
+      op: { background: "var(--moss-tint)", color: "var(--forest)", border: "1px solid var(--border)" },
+      equals: { background: "var(--forest)", color: "#fff", border: "1px solid var(--forest)" },
+      util: { background: "var(--paper)", color: "var(--ink-soft)", border: "1px solid var(--border)" },
+      sci: { background: "var(--paper)", color: "var(--ink)", border: "1px solid var(--border)", fontSize: 13 },
+    };
+    return (
+      <button className="maar-focus" onClick={onClick} style={{
+        ...variants[variant], borderRadius: 12, fontWeight: 600, fontSize: variant === "sci" ? 13 : 16,
+        padding: "13px 0", gridColumn: wide ? "span 2" : undefined, transition: "transform 0.1s ease",
+      }}
+        onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.95)"; }}
+        onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+        onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+      >
+        {label}
+      </button>
+    );
+  };
+
+  // Keyboard support — scoped to this wrapper so it never hijacks typing elsewhere.
+  const onKeyDown = (e) => {
+    if (/^[0-9]$/.test(e.key)) inputDigit(e.key);
+    else if (e.key === ".") inputDecimal();
+    else if (e.key === "+") chooseOperator("+");
+    else if (e.key === "-") chooseOperator("-");
+    else if (e.key === "*") chooseOperator("×");
+    else if (e.key === "/") { e.preventDefault(); chooseOperator("÷"); }
+    else if (e.key === "Enter" || e.key === "=") compute();
+    else if (e.key === "Backspace") backspace();
+    else if (e.key === "Escape") clearAll();
+    else if (e.key === "%") inputPercent();
+  };
+
+  return (
+    <div style={{ padding: isMobile ? "8px 18px 24px" : "8px 30px 30px" }}>
+      <p style={{ fontSize: 14.5, color: "var(--ink-soft)", margin: "0 0 22px" }}>
+        A quick calculator, plus tools built for the numbers that actually matter here — how a goal grows, and when you'll reach it.
+      </p>
+
+      <div style={{ display: "grid", gap: 16, gridTemplateColumns: isMobile ? "1fr" : "minmax(300px, 380px) 1fr" }}>
+        {/* Calculator */}
+        <Card>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+            <CardHeading title="Calculator" sub={memory !== 0 ? `M = ${round(memory)}` : undefined} />
+            <button className="maar-focus" onClick={() => setScientific((v) => !v)} style={{
+              fontSize: 12, fontWeight: 700, padding: "6px 12px", borderRadius: 999,
+              border: `1.5px solid ${scientific ? "var(--forest)" : "var(--border)"}`,
+              background: scientific ? "var(--moss-tint)" : "transparent", color: scientific ? "var(--forest)" : "var(--ink-soft)",
+            }}>
+              Scientific
+            </button>
+          </div>
+
+          <div tabIndex={0} onKeyDown={onKeyDown} style={{ outline: "none" }}>
+            <div style={{
+              background: "var(--paper)", border: "1px solid var(--border)", borderRadius: 14,
+              padding: "18px 16px", textAlign: "right", marginBottom: 12, overflow: "hidden",
+            }}>
+              {operator && (
+                <div style={{ fontSize: 12.5, color: "var(--ink-soft)", marginBottom: 4 }}>
+                  {round(prev)} {operator}
+                </div>
+              )}
+              <div className="maar-serif" style={{ fontSize: 32, fontWeight: 600, whiteSpace: "nowrap", overflowX: "auto" }}>
+                {display}
+              </div>
+            </div>
+
+            {scientific && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6, marginBottom: 8 }}>
+                {memButtons.map((b) => <CalcBtn key={b.label} label={b.label} onClick={b.fn} variant="util" />)}
+                {sciButtons.map((b) => <CalcBtn key={b.label} label={b.label} onClick={b.fn} variant="sci" />)}
+              </div>
+            )}
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+              <CalcBtn label="AC" onClick={clearAll} variant="util" />
+              <CalcBtn label="⌫" onClick={backspace} variant="util" />
+              <CalcBtn label="%" onClick={inputPercent} variant="util" />
+              <CalcBtn label="÷" onClick={() => chooseOperator("÷")} variant="op" />
+
+              <CalcBtn label="7" onClick={() => inputDigit("7")} />
+              <CalcBtn label="8" onClick={() => inputDigit("8")} />
+              <CalcBtn label="9" onClick={() => inputDigit("9")} />
+              <CalcBtn label="×" onClick={() => chooseOperator("×")} variant="op" />
+
+              <CalcBtn label="4" onClick={() => inputDigit("4")} />
+              <CalcBtn label="5" onClick={() => inputDigit("5")} />
+              <CalcBtn label="6" onClick={() => inputDigit("6")} />
+              <CalcBtn label="−" onClick={() => chooseOperator("-")} variant="op" />
+
+              <CalcBtn label="1" onClick={() => inputDigit("1")} />
+              <CalcBtn label="2" onClick={() => inputDigit("2")} />
+              <CalcBtn label="3" onClick={() => inputDigit("3")} />
+              <CalcBtn label="+" onClick={() => chooseOperator("+")} variant="op" />
+
+              <CalcBtn label="±" onClick={toggleSign} variant="util" />
+              <CalcBtn label="0" onClick={() => inputDigit("0")} />
+              <CalcBtn label="." onClick={inputDecimal} />
+              <CalcBtn label="=" onClick={compute} variant="equals" />
+            </div>
+          </div>
+        </Card>
+
+        {/* Finance tools */}
+        <div style={{ display: "grid", gap: 16, alignContent: "start" }}>
+          <SavingsGrowthTool isMobile={isMobile} />
+          <GoalTimelineTool isMobile={isMobile} defaultCurrent={data.savings.reduce((s, e) => s + e.amount, 0)} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SavingsGrowthTool({ isMobile }) {
+  const [starting, setStarting] = useState("");
+  const [monthly, setMonthly] = useState("");
+  const [rate, setRate] = useState("");
+  const [years, setYears] = useState("");
+
+  const result = useMemo(() => {
+    const p = parseFloat(starting) || 0;
+    const pmt = parseFloat(monthly) || 0;
+    const annualRate = parseFloat(rate) || 0;
+    const y = parseFloat(years) || 0;
+    if (y <= 0) return null;
+    const n = y * 12;
+    const i = annualRate / 100 / 12;
+    let futureValue;
+    if (i === 0) {
+      futureValue = p + pmt * n;
+    } else {
+      futureValue = p * Math.pow(1 + i, n) + pmt * ((Math.pow(1 + i, n) - 1) / i);
+    }
+    const contributed = p + pmt * n;
+    const interest = futureValue - contributed;
+    return { futureValue, contributed, interest };
+  }, [starting, monthly, rate, years]);
+
+  return (
+    <Card>
+      <CardHeading title="How your savings could grow" sub="Compound growth on a starting amount plus regular contributions" />
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 4 }}>
+        <Field label="Starting amount">
+          <AmountInput value={starting} onChange={setStarting} placeholder="0.00" />
+        </Field>
+        <Field label="Monthly contribution">
+          <AmountInput value={monthly} onChange={setMonthly} placeholder="0.00" />
+        </Field>
+        <Field label="Annual growth rate">
+          <div style={{ position: "relative" }}>
+            <input className="maar-focus" type="number" min="0" step="0.1" placeholder="0" value={rate}
+              onChange={(e) => setRate(e.target.value)} style={{ ...inputStyle, paddingRight: 28 }} />
+            <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "var(--ink-soft)", fontSize: 14 }}>%</span>
+          </div>
+        </Field>
+        <Field label="Time horizon">
+          <div style={{ position: "relative" }}>
+            <input className="maar-focus" type="number" min="0" step="1" placeholder="0" value={years}
+              onChange={(e) => setYears(e.target.value)} style={{ ...inputStyle, paddingRight: 44 }} />
+            <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "var(--ink-soft)", fontSize: 13 }}>years</span>
+          </div>
+        </Field>
+      </div>
+
+      {result ? (
+        <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "repeat(3, 1fr)", gap: 10, marginTop: 12, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+          <div>
+            <p style={{ fontSize: 11.5, color: "var(--ink-soft)", margin: "0 0 3px", fontWeight: 600 }}>Future value</p>
+            <p className="maar-serif" style={{ fontSize: 18, fontWeight: 600, margin: 0, color: "var(--forest)" }}>{formatGBP(result.futureValue)}</p>
+          </div>
+          <div>
+            <p style={{ fontSize: 11.5, color: "var(--ink-soft)", margin: "0 0 3px", fontWeight: 600 }}>You'll have put in</p>
+            <p className="maar-serif" style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>{formatGBP(result.contributed)}</p>
+          </div>
+          <div>
+            <p style={{ fontSize: 11.5, color: "var(--ink-soft)", margin: "0 0 3px", fontWeight: 600 }}>Growth earned</p>
+            <p className="maar-serif" style={{ fontSize: 18, fontWeight: 600, margin: 0, color: "var(--brass)" }}>{formatGBP(Math.max(0, result.interest))}</p>
+          </div>
+        </div>
+      ) : (
+        <p style={{ fontSize: 12.5, color: "var(--ink-soft)", margin: "10px 0 0" }}>Add a time horizon to see how this could grow.</p>
+      )}
+    </Card>
+  );
+}
+
+function GoalTimelineTool({ defaultCurrent = 0, isMobile }) {
+  const [target, setTarget] = useState("");
+  const [current, setCurrent] = useState(defaultCurrent > 0 ? String(defaultCurrent) : "");
+  const [monthly, setMonthly] = useState("");
+  const [rate, setRate] = useState("");
+
+  const result = useMemo(() => {
+    const t = parseFloat(target) || 0;
+    const c = parseFloat(current) || 0;
+    const pmt = parseFloat(monthly) || 0;
+    const annualRate = parseFloat(rate) || 0;
+    if (t <= 0) return null;
+    if (c >= t) return { months: 0, reached: true };
+    const i = annualRate / 100 / 12;
+
+    if (i === 0) {
+      if (pmt <= 0) return { months: null };
+      const months = Math.ceil((t - c) / pmt);
+      return { months };
+    }
+    const numerator = t * i + pmt;
+    const denominator = c * i + pmt;
+    if (denominator <= 0 || numerator / denominator <= 1) return { months: null };
+    const months = Math.ceil(Math.log(numerator / denominator) / Math.log(1 + i));
+    return { months: months > 0 ? months : 0 };
+  }, [target, current, monthly, rate]);
+
+  const monthsToText = (m) => {
+    if (m === 0) return "You're already there";
+    const y = Math.floor(m / 12);
+    const rem = m % 12;
+    const parts = [];
+    if (y > 0) parts.push(`${y} year${y > 1 ? "s" : ""}`);
+    if (rem > 0) parts.push(`${rem} month${rem > 1 ? "s" : ""}`);
+    return parts.join(", ");
+  };
+
+  return (
+    <Card>
+      <CardHeading title="When will you reach a goal?" sub="Uses your current total saved by default — adjust it for a specific bundle" />
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12, marginBottom: 4 }}>
+        <Field label="Target amount">
+          <AmountInput value={target} onChange={setTarget} placeholder="0.00" />
+        </Field>
+        <Field label="Amount saved so far">
+          <AmountInput value={current} onChange={setCurrent} placeholder="0.00" />
+        </Field>
+        <Field label="Monthly contribution">
+          <AmountInput value={monthly} onChange={setMonthly} placeholder="0.00" />
+        </Field>
+        <Field label="Annual growth rate" hint="Leave at 0 if it's just cash savings.">
+          <div style={{ position: "relative" }}>
+            <input className="maar-focus" type="number" min="0" step="0.1" placeholder="0" value={rate}
+              onChange={(e) => setRate(e.target.value)} style={{ ...inputStyle, paddingRight: 28 }} />
+            <span style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", color: "var(--ink-soft)", fontSize: 14 }}>%</span>
+          </div>
+        </Field>
+      </div>
+
+      {result && (
+        <div style={{ marginTop: 12, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+          {result.reached ? (
+            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--forest)", margin: 0 }}>You've already reached this target — nice work.</p>
+          ) : result.months === null ? (
+            <p style={{ fontSize: 13, color: "var(--ink-soft)", margin: 0 }}>
+              At £0/month with no growth, this target won't be reached. Add a monthly contribution to see a timeline.
+            </p>
+          ) : (
+            <>
+              <p style={{ fontSize: 11.5, color: "var(--ink-soft)", margin: "0 0 3px", fontWeight: 600 }}>Estimated time to reach it</p>
+              <p className="maar-serif" style={{ fontSize: 20, fontWeight: 600, margin: 0, color: "var(--forest)" }}>{monthsToText(result.months)}</p>
+            </>
+          )}
+        </div>
+      )}
+    </Card>
+  );
+}
+
 /* ============================== PROFILE ============================== */
 
 function ProfilePage({ isMobile }) {
@@ -1397,6 +1816,7 @@ function AppShell() {
               {page === "expenses" && <ExpensesPage isMobile={isMobile} />}
               {page === "bundles" && <BundlesPage isMobile={isMobile} />}
               {page === "achievements" && <AchievementsPage isMobile={isMobile} />}
+              {page === "calculator" && <CalculatorPage isMobile={isMobile} />}
               {page === "profile" && <ProfilePage isMobile={isMobile} />}
             </motion.div>
           </AnimatePresence>
