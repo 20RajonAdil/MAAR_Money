@@ -642,8 +642,77 @@ function TopBar({ title, action, onMenu, isMobile }) {
       display: "flex", alignItems: "center", justifyContent: "space-between",
       padding: isMobile ? "16px 18px 6px" : "26px 30px 6px",
     }}>
-      <h1 className="maar-serif" style={{ fontSize: isMobile ? 22 : 26, fontWeight: 600, margin: 0 }}>{title}</h1>
+      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        {isMobile && (
+          <button className="maar-focus" aria-label="Open menu" onClick={onMenu} style={{
+            background: "var(--moss-tint)", border: "none", borderRadius: 10, width: 34, height: 34,
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <Menu size={17} color="var(--forest)" />
+          </button>
+        )}
+        <h1 className="maar-serif" style={{ fontSize: isMobile ? 22 : 26, fontWeight: 600, margin: 0 }}>{title}</h1>
+      </div>
       {action}
+    </div>
+  );
+}
+
+function MobileDrawer({ page, setPage, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => e.key === "Escape" && onClose();
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 65, display: "flex" }}>
+      <motion.div
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        onClick={onClose}
+        style={{ position: "absolute", inset: 0, background: "rgba(28,38,33,0.42)" }}
+      />
+      <motion.div
+        role="dialog" aria-modal="true" aria-label="Navigation menu"
+        initial={{ x: -260 }} animate={{ x: 0 }} exit={{ x: -260 }}
+        transition={{ duration: 0.26, ease: [0.2, 0.8, 0.2, 1] }}
+        style={{
+          position: "relative", width: 250, maxWidth: "78%", height: "100%", background: "var(--card)",
+          padding: "18px 14px", display: "flex", flexDirection: "column", gap: 4,
+          boxShadow: "10px 0 32px rgba(0,0,0,0.16)", overflowY: "auto",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "6px 10px 22px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 9 }}>
+            <MaarMark size={26} />
+            <span className="maar-serif" style={{ fontSize: 16.5, fontWeight: 600 }}>
+              MAAR <span style={{ fontWeight: 400, color: "var(--ink-soft)" }}>Money</span>
+            </span>
+          </div>
+          <button className="maar-focus" aria-label="Close menu" onClick={onClose} style={{
+            background: "var(--moss-tint)", border: "none", borderRadius: 999, width: 30, height: 30,
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <X size={15} />
+          </button>
+        </div>
+        {NAV_ITEMS.map((item) => {
+          const active = page === item.id;
+          return (
+            <button key={item.id} className="maar-focus" onClick={() => { setPage(item.id); onClose(); }} aria-current={active ? "page" : undefined}
+              style={{
+                display: "flex", alignItems: "center", gap: 11, padding: "11px 12px", borderRadius: 12,
+                border: "none", background: active ? "var(--moss-tint)" : "transparent",
+                color: active ? "var(--forest)" : "var(--ink-soft)", fontWeight: active ? 600 : 500,
+                fontSize: 15, textAlign: "left",
+              }}>
+              <item.icon size={19} strokeWidth={active ? 2.3 : 2} />
+              {item.label}
+            </button>
+          );
+        })}
+      </motion.div>
     </div>
   );
 }
@@ -1796,6 +1865,7 @@ function AppShell() {
   const { data, celebration, dismissCelebration, toast, dismissToast } = useApp();
   const [page, setPage] = useState("home");
   const [isMobile, setIsMobile] = useState(typeof window !== "undefined" ? window.innerWidth < 780 : false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     const onResize = () => setIsMobile(window.innerWidth < 780);
@@ -1810,7 +1880,7 @@ function AppShell() {
       {!isMobile && <Sidebar page={page} setPage={setPage} />}
       <div className="maar-scroll" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0, maxHeight: "100vh", overflowY: "auto" }}>
         <div style={{ flex: 1 }}>
-          <TopBar title={pageMeta.label} isMobile={isMobile} />
+          <TopBar title={pageMeta.label} isMobile={isMobile} onMenu={() => setDrawerOpen(true)} />
           <AnimatePresence mode="wait">
             <motion.div
               key={page}
@@ -1832,6 +1902,12 @@ function AppShell() {
         <Footer isMobile={isMobile} />
         {isMobile && <MobileNav page={page} setPage={setPage} />}
       </div>
+
+      <AnimatePresence>
+        {isMobile && drawerOpen && (
+          <MobileDrawer page={page} setPage={setPage} onClose={() => setDrawerOpen(false)} />
+        )}
+      </AnimatePresence>
 
       {celebration && (
         <CelebrationModal
