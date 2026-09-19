@@ -36,3 +36,7 @@ Uses [`motion`](https://motion.dev) (the Framer Motion successor) for a single p
 - Aims to meet WCAG 2.1 AA accessibility standards.
 
 MAAR Money is not a bank, financial adviser, or regulated financial service — it's a tool for organisation, tracking, and motivation.
+
+## Offline support
+
+This app works fully offline as a PWA — it caches itself for offline use automatically, no manual download step required.
