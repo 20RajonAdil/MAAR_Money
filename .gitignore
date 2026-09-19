@@ -1,3 +1,6 @@
-node_modules
-dist
+# build output
+-e 
 .DS_Store
+dist
+dist/
+node_modules
